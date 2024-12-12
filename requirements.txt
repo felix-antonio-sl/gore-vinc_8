@@ -21,5 +21,3 @@ itsdangerous
 click
 blinker
 cachelib
-htmx.org
-sqlite3

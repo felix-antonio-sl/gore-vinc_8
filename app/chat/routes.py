@@ -64,8 +64,10 @@ def widget():
     <html>
     <head>
         <title>Chat Experto</title>
-        <script src="https://unpkg.com/htmx.org"></script>
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@3.9.4/dist/full.css" rel="stylesheet">
+        <script src="https://unpkg.com/htmx.org@2.0.3" 
+                integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
+                crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.19/dist/full.min.css" rel="stylesheet" type="text/css" />
         <script src="https://cdn.tailwindcss.com"></script>
         <style>
             .chat-container {
