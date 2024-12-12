@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Widget</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.7.2/dist/full.css" rel="stylesheet" type="text/css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-transparent">
+    <div class="card bg-base-100 shadow-xl h-full">
+        <div class="card-body p-4">
+            <div id="chat-messages" 
+                 class="h-[400px] overflow-y-auto space-y-2 mb-4"
+                 hx-get="/chat/messages"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+            </div>
+            
+            <form hx-post="/chat/query"
+                  hx-target="#chat-messages"
+                  hx-swap="beforeend"
+                  class="flex gap-2">
+                <input type="text" 
+                       name="query" 
+                       class="input input-bordered input-sm flex-grow"
+                       placeholder="Escribe tu pregunta...">
+                <button type="submit" 
+                        class="btn btn-primary btn-sm">
+                    Enviar
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.successful) {
+                const messages = evt.detail.target;
+                messages.scrollTop = messages.scrollHeight;
+                evt.detail.elt.reset();
+            }
+        });
+    </script>
+</body>
+</html> 

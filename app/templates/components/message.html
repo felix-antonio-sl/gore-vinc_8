@@ -1,0 +1,16 @@
+<div class="chat {{ 'chat-end' if is_user else 'chat-start' }}">
+    <div class="chat-image avatar">
+        <div class="w-10 rounded-full">
+            <img src="{{ url_for('static', filename='images/' + ('user.png' if is_user else 'bot.png')) }}" />
+        </div>
+    </div>
+    <div class="chat-header">
+        {{ 'Tú' if is_user else 'Bot Experto' }}
+    </div>
+    <div class="chat-bubble {{ 'chat-bubble-primary' if is_user else '' }}">
+        {{ message }}
+    </div>
+    <div class="chat-footer opacity-50">
+        {{ timestamp | datetime }}
+    </div>
+</div> 

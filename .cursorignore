@@ -1,0 +1,83 @@
+# Directorios de dependencias
+node_modules/
+venv/
+.env/
+__pycache__/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Archivos de construcción y caché
+dist/
+build/
+*.pyc
+__pycache__/
+.cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.webassets-cache
+.parcel-cache/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.bak
+
+# Archivos de IDE y editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Archivos de logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archivos de configuración local
+.env
+.env.local
+*.local
+instance/
+.flaskenv
+config.py
+
+# Base de datos
+*.db
+*.sqlite
+*.sqlite3
+migrations/
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Node/Frontend
+node_modules/
+.npm
+.yarn/
+dist/
+.cache/
+.parcel-cache/
+tailwind.config.js.backup
+package-lock.json
+yarn.lock
+
+# APIs y Secretos
+*api_key*
+*secret*
+.secrets/
+credentials.json
+token.json
+
+# Archivos temporales
+tmp/
+temp/
+.temp/
+.tmp/ 
