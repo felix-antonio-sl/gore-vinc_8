@@ -1,50 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="card bg-base-100 shadow-xl">
-    <div class="card-body">
-        <!-- Indicador de carga -->
-        <div class="htmx-indicator">
-            <span class="loading loading-dots loading-lg"></span>
-        </div>
-        
-        <!-- Mensajes del chat -->
-        <div id="chat-messages" 
-             class="h-96 overflow-y-auto space-y-4 mb-4"
-             hx-get="{{ url_for('chat.get_messages') }}"
-             hx-trigger="load"
-             hx-swap="innerHTML transition:true"
-             hx-indicator=".htmx-indicator">
-        </div>
-        
-        <!-- Formulario de chat -->
-        <form hx-post="{{ url_for('chat.query') }}"
-              hx-target="#chat-messages"
-              hx-swap="beforeend transition:true"
-              hx-trigger="submit"
-              hx-indicator=".htmx-indicator"
-              hx-on::after-request="this.reset()"
-              class="flex gap-2">
-              
-            <input type="text" 
-                   name="query" 
-                   class="input input-bordered flex-grow"
-                   placeholder="Escribe tu pregunta..."
-                   hx-on::keyup="if(event.keyCode === 13) this.form.requestSubmit()">
-                   
-            <button type="submit" 
-                    class="btn btn-primary"
-                    hx-disabled-elt="this">
-                Enviar
-            </button>
-        </form>
+<div class="container mx-auto p-4">
+    <div id="chat-messages" class="space-y-4 mb-4">
+        <!-- Los mensajes se insertarán aquí -->
     </div>
-</div>
 
-<!-- Eventos personalizados -->
-<script>
-    htmx.on('#chat-messages', 'htmx:afterSwap', function(evt) {
-        evt.detail.target.scrollTop = evt.detail.target.scrollHeight;
-    });
-</script>
+    <form hx-post="{{ url_for('chat.query')|e }}"
+          hx-target="#chat-messages"
+          hx-swap="beforeend transition:true"
+          hx-trigger="submit"
+          hx-indicator=".htmx-indicator"
+          hx-on::after-request="this.reset()"
+          class="flex gap-2">
+          
+        <input type="text" 
+               name="query" 
+               maxlength="500"
+               class="input input-bordered flex-grow"
+               placeholder="Escribe tu pregunta..."
+               hx-disable-element="button"
+               required>
+               
+        <button type="submit" 
+                class="btn btn-primary"
+                data-loading-disable>
+            <span class="htmx-indicator">
+                <span class="loading loading-spinner"></span>
+            </span>
+            <span>Enviar</span>
+        </button>
+    </form>
+</div>
 {% endblock %} 

@@ -1,16 +1,29 @@
-<div class="chat {{ 'chat-end' if is_user else 'chat-start' }}">
-    <div class="chat-image avatar">
-        <div class="w-10 rounded-full">
-            <img src="{{ url_for('static', filename='images/' + ('user.png' if is_user else 'bot.png')) }}" />
+<div class="chat-message {{ 'chat-message-user' if is_user else 'chat-message-assistant' }}"
+     hx-swap-oob="true">
+    {% if error %}
+        <div class="alert alert-error shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{{ error|e }}</span>
         </div>
-    </div>
-    <div class="chat-header">
-        {{ 'Tú' if is_user else 'Bot Experto' }}
-    </div>
-    <div class="chat-bubble {{ 'chat-bubble-primary' if is_user else '' }}">
-        {{ message }}
-    </div>
-    <div class="chat-footer opacity-50">
-        {{ timestamp | datetime }}
-    </div>
+    {% else %}
+        <div class="flex items-start gap-2 p-2 rounded-lg {{ 'bg-base-200' if not is_user else '' }}">
+            <div class="avatar">
+                <div class="w-8 rounded">
+                    <img src="{{ url_for('static', filename='img/' + ('user.png' if is_user else 'assistant.png')) }}" 
+                         alt="{{ 'Usuario' if is_user else 'Asistente' }}"
+                         loading="lazy">
+                </div>
+            </div>
+            <div class="flex-grow">
+                <div class="prose max-w-none">
+                    {{ message|safe }}
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                    {{ timestamp.strftime('%H:%M') }}
+                </div>
+            </div>
+        </div>
+    {% endif %}
 </div> 

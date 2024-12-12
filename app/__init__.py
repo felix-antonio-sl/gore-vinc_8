@@ -1,35 +1,19 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_cors import CORS
-from flask_jwt_extended import JWTManager
-from config import config
+from config import Config
+import ell
 
-# Inicialización de extensiones
-db = SQLAlchemy()
-migrate = Migrate()
-jwt = JWTManager()
-
-def create_app(config_name='default'):
+def create_app(config_class=Config):
     app = Flask(__name__)
-    app.config.from_object(config[config_name])
+    app.config.from_object(config_class)
     
-    # Inicializar extensiones
-    db.init_app(app)
-    migrate.init_app(app, db)
-    CORS(app)
-    jwt.init_app(app)
+    # Inicializar ell con las API keys
+    ell.init(
+        openai_api_key=app.config['OPENAI_API_KEY'],
+        anthropic_api_key=app.config['ANTHROPIC_API_KEY']
+    )
     
     # Registrar blueprints
-    from app.api import bp as api_bp
-    app.register_blueprint(api_bp, url_prefix='/api')
-    
-    from app.chat import bp as chat_bp
-    app.register_blueprint(chat_bp, url_prefix='/chat')
-    
-    # Inicializar ELL
-    from app.services.ell_service import init_ell
-    with app.app_context():
-        init_ell(app)
+    from app.chat import chat_bp
+    app.register_blueprint(chat_bp)
     
     return app 

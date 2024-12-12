@@ -34,13 +34,17 @@ class EllService:
     @ell.complex(model="gpt-4")
     def query_with_context(self, query: str, context: List[str]) -> List[ell.Message]:
         """You are an expert assistant that provides detailed answers based on given context."""
-        return [
-            ell.system("Analyze the context and provide a detailed response to the query."),
-            ell.user([
-                "Context:\n" + "\n".join(context),
-                "Query: " + query
-            ])
-        ]
+        try:
+            return [
+                ell.system("Soy un asistente experto que proporciona respuestas detalladas basadas en el contexto dado."),
+                ell.user([
+                    "Contexto:\n" + "\n".join(context),
+                    "Consulta: " + query
+                ])
+            ]
+        except Exception as e:
+            current_app.logger.error(f"Error en ELL query: {str(e)}")
+            raise
 
     @ell.complex(model="gpt-4-vision-preview")
     def analyze_image(self, image: Image.Image, query: str) -> List[ell.Message]:
