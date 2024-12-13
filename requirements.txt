@@ -1,6 +1,6 @@
 flask
-flask-sqlalchemy
-flask-migrate
+Flask-SQLAlchemy
+Flask-Migrate
 python-dotenv
 ell-ai
 openai

@@ -23,6 +23,7 @@
             <form hx-post="/chat/query"
                   hx-target="#chat-messages"
                   hx-swap="beforeend"
+                  hx-headers='{"Authorization": "Bearer {{ access_token }}"}'
                   class="flex gap-2">
                 <input type="text" 
                        name="query" 

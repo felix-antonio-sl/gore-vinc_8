@@ -8,5 +8,5 @@ class Document(db.Model):
     content = db.Column(db.Text, nullable=False)
     domain = db.Column(db.String(64), nullable=False)
     embedding = db.Column(db.PickleType)
-    metadata = db.Column(db.JSON)
+    doc_metadata = db.Column(db.JSON)
     created_at = db.Column(db.DateTime, server_default=db.func.now()) 

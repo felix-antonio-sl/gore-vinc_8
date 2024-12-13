@@ -3,7 +3,7 @@ from werkzeug.exceptions import BadRequest
 from datetime import datetime
 from . import bp
 from app.services.ell_service import ell_service
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from config import Config
 import ell
 
@@ -22,24 +22,31 @@ async def query():
         user_id = get_jwt_identity()
         current_app.logger.info(f"Consulta recibida de usuario {user_id}: {query}")
             
-        response = await ell_service.query_with_context(
-            query=query,
-            max_results=5
-        )
+        context = []  # Lista vacía por ahora
         
-        return render_template('components/message.html',
-                             message=response,
-                             is_user=False,
-                             timestamp=datetime.utcnow())
+        try:
+            # Asegurarnos de que esperamos la respuesta
+            response = await ell_service.query_with_context(
+                query=query,
+                context=context
+            )
+            
+            return await render_template('components/message.html',
+                                      message=response,
+                                      is_user=False,
+                                      timestamp=datetime.utcnow())
+        except Exception as e:
+            current_app.logger.error(f"Error en ELL query: {str(e)}")
+            raise
                              
     except BadRequest as e:
         current_app.logger.warning(f"Error de validación: {str(e)}")
-        return render_template('components/message.html', 
-                             error=str(e)), 400
+        return await render_template('components/message.html', 
+                                  error=str(e)), 400
     except Exception as e:
         current_app.logger.error(f"Error en query: {str(e)}")
-        return render_template('components/message.html',
-                             error="Error interno del servidor"), 500
+        return await render_template('components/message.html',
+                                  error="Error interno del servidor"), 500
 
 @bp.route('/messages', methods=['GET'])
 @jwt_required()
@@ -59,60 +66,10 @@ def get_messages():
 @bp.route('/widget')
 def widget():
     """Retorna el HTML del widget del chat."""
-    return """
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <title>Chat Experto</title>
-        <script src="https://unpkg.com/htmx.org@2.0.3" 
-                integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" 
-                crossorigin="anonymous"></script>
-        <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.19/dist/full.min.css" rel="stylesheet" type="text/css" />
-        <script src="https://cdn.tailwindcss.com"></script>
-        <style>
-            .chat-container {
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-            }
-            .messages {
-                flex-grow: 1;
-                overflow-y: auto;
-                padding: 1rem;
-            }
-        </style>
-    </head>
-    <body class="bg-base-200">
-        <div class="chat-container">
-            <div class="messages" id="chat-messages">
-                <!-- Los mensajes se insertarán aquí -->
-            </div>
-            
-            <form class="p-4 bg-base-100 shadow-lg"
-                  hx-post="/chat/query"
-                  hx-target="#chat-messages"
-                  hx-swap="beforeend">
-                <div class="flex gap-2">
-                    <input type="text" 
-                           name="query" 
-                           class="input input-bordered flex-grow"
-                           placeholder="Escribe tu pregunta...">
-                    <button type="submit" class="btn btn-primary">Enviar</button>
-                </div>
-            </form>
-        </div>
-        
-        <script>
-            document.body.addEventListener('htmx:afterRequest', function(evt) {
-                if (evt.detail.successful) {
-                    evt.detail.target.scrollTop = evt.detail.target.scrollHeight;
-                    evt.detail.elt.querySelector('input').value = '';
-                }
-            });
-        </script>
-    </body>
-    </html>
-    """
+    # Generar un token de acceso para el widget
+    access_token = create_access_token(identity="widget_user")
+    
+    return render_template('widget/chat.html', access_token=access_token)
 
 @ell.simple(model=Config.DEFAULT_MODEL)
 def generate_response(prompt: str):
