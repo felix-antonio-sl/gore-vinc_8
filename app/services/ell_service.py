@@ -2,10 +2,12 @@ import ell
 from typing import List, Dict, Any
 from flask import current_app, Flask
 from PIL import Image
+from ell import Message, ContentBlock
 
 class EllService:
     def __init__(self, app: Flask = None):
         self.store_path = None
+        self.lmps = None
         if app is not None:
             self.init_app(app)
 
@@ -21,43 +23,35 @@ class EllService:
         # Inicializar ell con almacenamiento y autocommit
         ell.init(store=self.store_path, autocommit=True, verbose=True)
         
+        # Inicializar LMPs
+        self.lmps = self._create_lmps(app)
+        
         # Opcional: registrar en extensiones de Flask
         if not hasattr(app, 'extensions'):
             app.extensions = {}
         app.extensions['ell'] = self
 
-    @ell.simple(model="gpt-4o")
-    def basic_query(self, query: str):
-        """You are a helpful assistant that provides clear and concise answers."""
-        return query
+    def _create_lmps(self, app):
+        return {
+            'basic': self._create_basic_lmp(app),
+            'chat': self._create_chat_lmp(app),
+            'creative': self._create_creative_lmp(app)
+        }
+
+    @staticmethod
+    def _create_basic_lmp(app):
+        @ell.simple(model=app.config['DEFAULT_MODEL'])
+        def basic_query(query: str):
+            """Asistente básico para consultas simples."""
+            return query
+        return basic_query
 
     @ell.complex(model="gpt-4o")
-    async def query_with_context(self, query: str, context: List[str]) -> str:
-        """You are an expert assistant that provides detailed answers based on given context."""
+    def query_with_context(self, messages: List[Message]) -> str:
+        """You are a helpful assistant."""
         try:
-            # Crear lista de mensajes según la documentación de ELL
-            messages = [
-                ell.Message(
-                    content="Soy un asistente experto que proporciona respuestas detalladas basadas en el contexto dado.",
-                    role="system"
-                ),
-                ell.Message(
-                    content=[
-                        "Contexto:\n" + "\n".join(context),
-                        "Consulta: " + query
-                    ],
-                    role="user"
-                )
-            ]
-            
-            # Obtener la respuesta del modelo
-            response = await ell.chat(messages)
-            
-            # Extraer el contenido del mensaje
-            if isinstance(response, ell.Message):
-                return response.content
-            return str(response)
-            
+            # Con @ell.complex, retornamos los mensajes directamente
+            return messages
         except Exception as e:
             current_app.logger.error(f"Error en ELL query: {str(e)}")
             raise

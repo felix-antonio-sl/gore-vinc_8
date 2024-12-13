@@ -6,12 +6,10 @@
         <!-- Los mensajes se insertarán aquí -->
     </div>
 
-    <form hx-post="{{ url_for('chat.query')|e }}"
+    <form hx-post="{{ url_for('chat.query') }}"
           hx-target="#chat-messages"
-          hx-swap="beforeend transition:true"
-          hx-trigger="submit"
-          hx-indicator=".htmx-indicator"
-          hx-on::after-request="this.reset()"
+          hx-swap="beforeend"
+          hx-headers='{"Authorization": "Bearer {{ access_token }}"}'
           class="flex gap-2">
           
         <input type="text" 
@@ -19,16 +17,11 @@
                maxlength="500"
                class="input input-bordered flex-grow"
                placeholder="Escribe tu pregunta..."
-               hx-disable-element="button"
                required>
                
         <button type="submit" 
-                class="btn btn-primary"
-                data-loading-disable>
-            <span class="htmx-indicator">
-                <span class="loading loading-spinner"></span>
-            </span>
-            <span>Enviar</span>
+                class="btn btn-primary">
+            Enviar
         </button>
     </form>
 </div>

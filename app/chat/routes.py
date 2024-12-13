@@ -6,10 +6,11 @@ from app.services.ell_service import ell_service
 from flask_jwt_extended import jwt_required, get_jwt_identity, create_access_token
 from config import Config
 import ell
+from ell import Message
 
 @bp.route('/query', methods=['POST'])
 @jwt_required()
-async def query():
+def query():
     """Endpoint para procesar consultas del chat."""
     try:
         query = request.form.get('query')
@@ -21,32 +22,41 @@ async def query():
         
         user_id = get_jwt_identity()
         current_app.logger.info(f"Consulta recibida de usuario {user_id}: {query}")
-            
-        context = []  # Lista vacía por ahora
+        
+        # Crear mensajes usando las funciones helper de ell
+        messages = [
+            ell.system("You are a helpful assistant."),
+            ell.user(query)
+        ]
         
         try:
-            # Asegurarnos de que esperamos la respuesta
-            response = await ell_service.query_with_context(
-                query=query,
-                context=context
-            )
+            # La respuesta será un Message del asistente
+            assistant_message = ell_service.query_with_context(messages=messages)
             
-            return await render_template('components/message.html',
-                                      message=response,
-                                      is_user=False,
-                                      timestamp=datetime.utcnow())
+            if not assistant_message:
+                raise ValueError("No se recibió respuesta del modelo")
+            
+            # Extraer el contenido del mensaje del asistente
+            response_text = assistant_message.content if hasattr(assistant_message, 'content') else str(assistant_message)
+            
+            return render_template('components/message.html',
+                              message=response_text,
+                              is_user=False,
+                              timestamp=datetime.utcnow())
+                                
         except Exception as e:
             current_app.logger.error(f"Error en ELL query: {str(e)}")
-            raise
+            return render_template('components/message.html',
+                              error="Error al procesar la consulta"), 500
                              
     except BadRequest as e:
         current_app.logger.warning(f"Error de validación: {str(e)}")
-        return await render_template('components/message.html', 
-                                  error=str(e)), 400
+        return render_template('components/message.html', 
+                           error=str(e)), 400
     except Exception as e:
         current_app.logger.error(f"Error en query: {str(e)}")
-        return await render_template('components/message.html',
-                                  error="Error interno del servidor"), 500
+        return render_template('components/message.html',
+                           error="Error interno del servidor"), 500
 
 @bp.route('/messages', methods=['GET'])
 @jwt_required()

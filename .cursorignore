@@ -81,3 +81,12 @@ tmp/
 temp/
 .temp/
 .tmp/ 
+
+# Archivos de documentación
+# docsaux/
+# ell_store/
+# documentacion_proyecto.md
+
+# Scripts
+generate_project_tree.py
+generate_project_docs.py
